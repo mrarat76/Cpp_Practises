@@ -656,12 +656,12 @@ void listOrders() {
     }
 }
 
-void listUsers(struct UserBase users[], int userCount) {
+void listUsers(const std::vector<UserBase>& users) {
     std::cout << "All users:" << std::endl;
-    for (int i = 0; i < userCount; i++) {
-        std::cout << "Username: " << users[i].getUsername() << std::endl;
-        std::cout << "Password: " << users[i].getPassword() << std::endl;
-        std::cout << "Is Admin: " << users[i].isAdminUser() << std::endl;
+    for (const UserBase& user : users) {
+        std::cout << "Username: " << user.getUsername() << std::endl;
+        std::cout << "Password: " << user.getPassword() << std::endl;
+        std::cout << "Is Admin: " << user.isAdminUser() << std::endl;
         std::cout << "Admins are 0, Users are 1" << std::endl;
         std::cout << std::endl;
     }
@@ -677,14 +677,13 @@ void addUserAdmin(User** userPtr, admin* newAdmin) {
    // (*userPtr)->admin = newAdmin;
 }
 
-void finduser(struct UserBase users[], int userCount, char* username) {
-    int i;
+void findUser(const std::vector<UserBase>& users, const std::string& username) {
     int found = 0;
-    for (i = 0; i < userCount; i++) {
-        if (users[i].getUsername()== username) {
-            std::cout << "Username: " << users[i].getUsername() << std::endl;
-            std::cout << "Password: " << users[i].getPassword() << std::endl;
-            std::cout << "Is Admin: " << users[i].isAdminUser() << std::endl;
+    for (const UserBase& user : users) {
+        if (user.getUsername() == username) {
+            std::cout << "Username: " << user.getUsername() << std::endl;
+            std::cout << "Password: " << user.getPassword() << std::endl;
+            std::cout << "Is Admin: " << user.isAdminUser() << std::endl;
             std::cout << "Admins are 0, Users are 1" << std::endl;
             std::cout << std::endl;
             found = 1;
@@ -692,5 +691,88 @@ void finduser(struct UserBase users[], int userCount, char* username) {
     }
     if (!found) {
         std::cout << "The username " << username << " could not be found." << std::endl;
+    }
+}
+
+
+
+
+void writeUserToTxtFile(const User& user) {
+    std::ofstream file("user.txt");
+    if (file.is_open()) {
+        file << user.getUsername() << std::endl;
+        file << user.getPassword() << std::endl;
+        file.close();
+        std::cout << "User information written to file: " << "user.txt" << std::endl;
+    } else {
+        std::cerr << "Unable to open file: " << "user.txt" << std::endl;
+    }
+}
+
+void readUserFromTxtFile(User& user) {
+    std::ifstream file("user.txt");
+    if (file.is_open()) {
+        std::string username, password, isAdminStr;
+        std::getline(file, username);
+        std::getline(file, password);
+        std::getline(file, isAdminStr);
+        file.close();
+
+        user.setUsername(username);
+        user.setPassword(password);
+        std::cout << "User information read from file: " << "user.txt" << std::endl;
+    } else {
+        std::cerr << "Unable to open file: " << "user.txt" << std::endl;
+    }
+}
+
+void writeAdminToTxtFile(const admin& admin) {
+    std::ofstream file("admin.txt");
+    if (file.is_open()) {
+        file << admin.getUsername() << std::endl;
+        file << admin.getPassword() << std::endl;
+        file.close();
+        std::cout << "Admin information written to file: " << "admin.txt" << std::endl;
+    } else {
+        std::cerr << "Unable to open file: " << "admin.txt" << std::endl;
+    }
+}
+
+void liststandartuser(const std::vector<User>& user) {
+    std::cout << "All users:" << std::endl;
+    for (const User& user : user) {
+        
+            std::cout << "Username: " << user.getUsername() << std::endl;
+            std::cout << "Password: " << user.getPassword() << std::endl;
+            std::cout << std::endl;
+        
+    }
+}
+
+void listadminuser(const std::vector<admin>& admins){
+std::cout << "All admins:" << std::endl;
+    for (const admin& admine : admins) {
+        
+            std::cout << "Username: " << admine.getUsername() << std::endl;
+            std::cout << "Password: " << admine.getPassword() << std::endl;
+            std::cout << std::endl;
+        
+    }
+}
+
+void readAdminFromTxtFile(admin& admin) {
+    std::ifstream file("admin.txt");
+    if (file.is_open()) {
+        std::string username, password, isAdminStr;
+        std::getline(file, username);
+        std::getline(file, password);
+        std::getline(file, isAdminStr);
+        file.close();
+
+        admin.setUsername(username);
+        admin.setPassword(password);
+        std::cout << "Admin information read from file: " << "admin.txt" << std::endl;
+    } else {
+        std::cerr << "Unable to open file: " << "admin.txt" << std::endl;
     }
 }

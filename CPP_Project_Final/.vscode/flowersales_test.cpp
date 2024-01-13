@@ -4,12 +4,14 @@
 #include <vector>
 #include "flowessalse.hpp"
 #include "flowersales_imp.cpp"
+#include "messagesandmanager.cpp"
 
 int main() {
     // Initialize the flower database
     initializeFlowerDatabase();
     loadFlowerDataFromFile();
     std::vector<UserBase> users(100); // Maximum assumption of 100 users
+    std::vector<Manager> managers = readManagersFromFile();
     int userCount = 0;
 
     // Read users from a file
@@ -37,6 +39,146 @@ int main() {
     std::string username;
 
     while (true) {
+       
+       int loginChoice;
+        std::cout << "\033[37;1mProvided by AraTech Autonomous Systems\033[0m" << std::endl;
+        std::cout << "=== FLOWER SALES SYSTEM ===" << std::endl;
+        std::cout << "1. Login" << std::endl;
+        std::cout << "2. Manager Login / Register" << std::endl;
+        std::cout << "3. Exit" << std::endl;
+        std::cout << "Enter your choice: ";
+        std::cin >> loginChoice;
+
+        switch (loginChoice){
+         case 1: {
+                // Normal username and password login
+                std::string password;
+
+                std::cout << "===     LOGIN PAGE    ===" << std::endl;
+                std::cout << "Username: ";
+                std::cin >> username;
+                std::cout << "Password: ";
+                std::cin >> password;
+
+                // Check username and password, allow them to log in
+                int userIndex = -1;
+                for (int i = 0; i < userCount; i++) {
+                    if (username == users[i].getUsername() && password == users[i].getPassword()) {
+                        isLoggedIn = true; // User has logged in
+                        break;
+                    }
+                }
+
+                if (!isLoggedIn) {
+                    std::cout << "Invalid username or password." << std::endl;
+                    continue; // If user can't log in, return to the main menu
+                }
+                break;
+            }
+
+           case 2:
+                 int managerChoice;
+                std::cout << "=== MANAGER LOGIN / REGISTER ===" << std::endl;
+                std::cout << "1. Manager Login" << std::endl;
+                std::cout << "2. Register as User" << std::endl;
+                std::cout << "Enter your choice: ";
+                std::cin >> managerChoice;
+              
+
+              switch (managerChoice) {
+                case 1: {
+                    // Manager login
+                    std::string managerusername;
+                    std::string managerpassword;
+
+                    std::cout << "===     LOGIN PAGE    ===" << std::endl;
+                    std::cout << "Username: ";
+                    std::cin >> managerusername;
+                    std::cout << "Password: ";
+                    std::cin >> managerpassword;
+
+                    
+
+                    // Check username and password, allow them to log in
+                    int userIndex = -1;
+                    for (int i = 0; i < userCount; i++) {
+                        if (managerusername == managers[i].username && managerpassword == managers[i].password) {
+                            
+                            std::cout << "Welcome " << managers[i].username << std::endl;
+                            std::cout << "1. Check Flower Sales" << std::endl;
+                            std::cout << "2. Check Flower Stock" << std::endl;
+                            std::cout << "3. List Users" << std::endl;
+                            std::cout << "4. Send Message to Admin" << std::endl;
+                            std::cout << "5. Exit" << std::endl;
+                            int swchoice;
+                            std::cin >> swchoice;
+
+                            switch (swchoice)
+                            {
+                            case 1:{
+                                 listOrders();}
+                            break;
+                               case 2:{
+                                 listFlowers(flowerDatabase, flowerCount);
+                            break;}
+                                 case 3:{
+                                    listUsers(users);
+                            break;}
+                            case 4:
+                            {
+
+                            
+                                std::string message;
+                                std::cout << "Enter your message: ";
+                                std::cin >> message;
+                                managers[i].writeMessage(message);
+                            break;}
+                                    case 5:{
+                                        std::cout << "Exiting..." << std::endl;
+                                        fflush(stdout); // Flush the buffer
+                                        system("cls");  // Clear the console (for Windows)
+                                        return main();}
+                            
+                            default:
+                                std::cout << "Invalid choice." << std::endl;
+                                break;
+                            }
+                            break;
+                        }
+                    }
+
+                    if (!isLoggedIn) {
+                        std::cout << "Invalid username or password." << std::endl;
+                        continue; // If user can't log in, return to the main menu
+                    }
+                    break;
+                }
+                case 2: {
+                // register array
+                }
+                case 3: {
+                std::cout << "Exiting..." << std::endl;
+                return 0; // Exit the program
+            }
+            default:
+                std::cout << "Invalid choice." << std::endl;
+                break;
+        }
+                
+
+
+
+        }
+        
+       
+       
+       
+       
+       
+       
+       
+       
+       
         if (!isLoggedIn) {
             // If the user is not logged in, request username and password
             std::string password;
@@ -106,14 +248,14 @@ int main() {
                             std::cin >> newPassword;
                             std::cout << "Specify whether the new user is an administrator (1) or a regular user (0): ";
                             std::cin >> newUserIsAdmin;
-                            adduser(users, userCount, newUsername, newPassword, newUserIsAdmin);
+                            adduser(users, &userCount, newUsername.c_str(), newPassword.c_str(), newUserIsAdmin);
                             break;
                         }
                         case 2: {
                             std::string deleteUser;
                             std::cout << "Enter the username to delete: ";
                             std::cin >> deleteUser;
-                            deleteUser(users, userCount, deleteUser);
+                            deleteuser(users, &userCount, deleteUser.c_str());
                             break;
                         }
                         case 3: {
@@ -142,7 +284,7 @@ int main() {
                             // Check if a flower with the given ID already exists
                             bool isAlreadyExist = false;
                             for (int i = 0; i < flowerCount; i++) {
-                                if (flowerDatabase[i].flowerID == id) {
+                                if (flowerDatabase[i].getFlowerID() == id) { // Assuming getFlowerID() is a public member function of the Flower class
                                     isAlreadyExist = true;
                                     break;
                                 }
@@ -163,7 +305,29 @@ int main() {
                             std::cout << "Enter the flower stock quantity:";
                             std::cin >> flowerStock;
 
-                            addFlower(id, flowerName, flowerPrice, flowerType, flowerStock);
+                            FlowerType flowerTypeEnum;
+                            switch (flowerType) {
+                                case 0:
+                                    flowerTypeEnum = static_cast<FlowerType>(0);
+                                    break;
+                                case 1:
+                                    flowerTypeEnum = static_cast<FlowerType>(1);
+                                    break;
+                                case 2:
+                                    flowerTypeEnum = static_cast<FlowerType>(2);
+                                    break;
+                                case 3:
+                                    flowerTypeEnum =static_cast<FlowerType>(3);
+                                    break;
+                                case 4:
+                                    flowerTypeEnum =static_cast<FlowerType>(4);
+                                    break;
+                                default:
+                                    std::cout << "Invalid flower type." << std::endl;
+                                    return;
+                            }
+
+                            addFlower(id, flowerName.c_str(), flowerPrice, flowerTypeEnum, flowerStock);
                             if (writeFlowerDataToFile()) {
                                 std::cout << "The flower has been successfully added." << std::endl;
                             } else {
@@ -179,7 +343,7 @@ int main() {
 
                             bool found = false;
                             for (int i = 0; i < flowerCount; i++) {
-                                if (flowerDatabase[i].flowerID == editFlowerID) {
+                                if (flowerDatabase[i].getFlowerID() == editFlowerID) { // Assuming getFlowerID() is a public member function of the Flower class
                                     found = true;
                                     break;
                                 }
@@ -204,7 +368,8 @@ int main() {
                             std::cout << "Enter the new flower stock quantity: ";
                             std::cin >> newFlowerStock;
 
-                            updateFlower(editFlowerID, newFlowerName, newFlowerPrice, newFlowerType, newFlowerStock);
+                            updateFlower(editFlowerID, newFlowerName.c_str(), newFlowerPrice, static_cast<FlowerType>(newFlowerType));
+
                             break;
                         }
                         case 8: {
@@ -219,14 +384,14 @@ int main() {
                             break;
                         }
                         case 10:{
-                            listUsers(users, userCount);
+                            listUsers(users);
                             break;
                         }
                         case 11:{
                             std::string userName;
                             std::cout << "To find, enter the username: ";
                             std::cin >> userName;
-                            findUser(users, userCount, userName);
+                            findUser(users, userName.c_str());
                             break;
                         }
                         default:
