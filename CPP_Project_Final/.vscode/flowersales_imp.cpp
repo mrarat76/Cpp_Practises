@@ -341,7 +341,7 @@ int writeUsersToFile(UserBase users[], int userCount) {
 }*/
 
 
-void deleteuser(std::vector<UserBase>& users, int* userCount, const char* deleteUsername) {
+void deleteuser(std::vector<UserBase>& users, int* userCount, const char* deleteUsername,std::vector<admin>& admins, int adminCount, std::vector<User>& userss, int usercount) {
     int found = 0;
     for (int i = 0; i < *userCount; i++) {
         if (std::string(deleteUsername) == users[i].getUsername()) { // Kullanıcı adı karşılaştırması
@@ -356,9 +356,9 @@ void deleteuser(std::vector<UserBase>& users, int* userCount, const char* delete
             (*userCount)--;
 
               if (isAdminUser == 0) {
-                deletestandartuser(users, userCount, deleteUsername); // Standart kullanıcıyı sil
+                deletestandartuser(userss, userCount, deleteUsername); // Standart kullanıcıyı sil
             } else if (isAdminUser == 1) {
-                deleteadmin(admins, adminCount, deleteUsername); // Admin kullanıcısını sil  /// ana metoda parametre eklenecek.
+                deleteadmin(admins, &adminCount, deleteUsername); // Admin kullanıcısını sil  /// ana metoda parametre eklenecek.
             }
 
 
@@ -527,7 +527,7 @@ void adduser(UserBase users[], int* userCount, const char* newUsername, const ch
 }*/
 
 
-void adduser(std::vector<UserBase>& users, int* userCount, const char* newUsername, const char* newPassword, int newUserIsAdmin) {
+void adduser(std::vector<UserBase>& users, int* userCount, const char* newUsername, const char* newPassword, int newUserIsAdmin,std::vector<admin>& admins, int adminCount, std::vector<User>& userss, int usercount ) {
     if (*userCount >= 100) {
         std::cout << "User limit exceeded. Cannot add more users." << std::endl;
         return;
@@ -542,7 +542,7 @@ void adduser(std::vector<UserBase>& users, int* userCount, const char* newUserna
     (*userCount)++;
 
 if (newUserIsAdmin == 0){
-   adduser(users, &userCount, newUsername, newPassword, newUserIsAdmin);
+   addstandartuser(userss, &usercount, newUsername, newPassword, newUserIsAdmin);
 } else {
     
      addadmin(admins, &adminCount, newUsername, newPassword, newUserIsAdmin); //ana metoda parametre eklenecek.
@@ -981,7 +981,7 @@ void liststandartuser(const std::vector<User>& users) {
     }
 }
 
-void updateuser(std::vector<UserBase>& users, int userCount, const char* usernameToUpdate, const char* newUsername, const char* newPassword, int newUserIsAdmin) {
+void updateuser(std::vector<UserBase>& users, int userCount, const char* usernameToUpdate, const char* newUsername, const char* newPassword, int newUserIsAdmin, std::vector<admin>& admins, int adminCount, std::vector<User>& userss, int usercount) {
     int found = 0;
     int isAdminUser = -1; // -1: Bulunamadı, 0: Standart kullanıcı, 1: Admin kullanıcı
 
@@ -997,7 +997,7 @@ void updateuser(std::vector<UserBase>& users, int userCount, const char* usernam
 
             if (isAdminUser == 0) {
                 // Eğer kullanıcı bir standart kullanıcıysa, standart kullanıcı işlemini çağır
-                updatestandartuser(users, userCount, usernameToUpdate, newUsername, newPassword, newUserIsAdmin);
+                updatestandartuser(userss, usercount, usernameToUpdate, newUsername, newPassword, newUserIsAdmin);
             } else if (isAdminUser == 1) {
                 // Eğer kullanıcı bir admin kullanıcısıysa, admin işlemini çağır
                 updateAdmin(admins, adminCount, usernameToUpdate, newUsername, newPassword, newUserIsAdmin);
@@ -1015,4 +1015,11 @@ void updateuser(std::vector<UserBase>& users, int userCount, const char* usernam
     if (!found) {
         std::cout << "User '" << usernameToUpdate << "' not found." << std::endl;
     }
+}
+
+
+
+void addToMessageArray(const std::string& messageType, std::vector<RegisterMessage>& messageArray) {
+    RegisterMessage newMessage(messageType);
+    messageArray.push_back(newMessage);
 }

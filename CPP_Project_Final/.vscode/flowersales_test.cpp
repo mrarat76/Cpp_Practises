@@ -10,8 +10,13 @@ int main() {
     // Initialize the flower database
     initializeFlowerDatabase();
     loadFlowerDataFromFile();
+    
     std::vector<UserBase> users(100); // Maximum assumption of 100 users
     std::vector<Manager> managers = readManagersFromFile();
+    std::vector<User> userss (100);
+    std::vector<admin> admins (100);
+    std::vector<RegisterMessage> regs(100);
+    
     int userCount = 0;
     int adminCount=0;
     int uscount=0;
@@ -155,8 +160,15 @@ int main() {
                     }
                     break;
                 }
+                
+
                 case 2: {
-                // register array
+                    std::string messageType;
+                    std::cout << "===     REGISTER PAGE    ===" << std::endl;
+                    std::cout << "Enter your message: ";
+                    std::cin >> messageType;
+                    addToMessageArray( messageType.c_str(),regs);
+                    // register array
                 }
                 case 3: {
                 std::cout << "Exiting..." << std::endl;
@@ -251,14 +263,16 @@ int main() {
                             std::cin >> newPassword;
                             std::cout << "Specify whether the new user is an administrator (1) or a regular user (0): ";
                             std::cin >> newUserIsAdmin;
-                            adduser(users, &userCount, newUsername.c_str(), newPassword.c_str(), newUserIsAdmin);
+                            
+                            adduser(users, &userCount, newUsername.c_str(), newPassword.c_str(), newUserIsAdmin, admins, adminCount, userss, uscount);
+
                             break;
                         }
                         case 2: {
                             std::string deleteUser;
                             std::cout << "Enter the username to delete: ";
                             std::cin >> deleteUser;
-                            deleteuser(users, &userCount, deleteUser.c_str());
+                            deleteuser(users, &userCount, deleteUser.c_str(), admins, adminCount, userss, uscount);
                             break;
                         }
                         case 3: {
@@ -413,7 +427,7 @@ int main() {
                             std::cout << "Specify if the user is an admin (1 for admin, 0 for regular user): ";
                             std::cin >> newUserIsAdmin;
 
-                            updateuser(users, userCount, userName.c_str(), newUsername.c_str(), newPassword.c_str(), newUserIsAdmin);
+                            updateuser(users, userCount, userName.c_str(), newUsername.c_str(), newPassword.c_str(), newUserIsAdmin, admins, adminCount, userss, uscount);
 
                             break;
                         }
