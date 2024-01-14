@@ -7,7 +7,8 @@
 #include <sstream> 
 
 enum FlowerType { ROSE, TULIP, LILY, DAISY, SUNFLOWER };
-
+// add,delete ve update için admin ve user classlarını dahil et.
+// manager için add,delete ve update yap.
 
 
 // Global variables
@@ -345,6 +346,7 @@ void deleteuser(std::vector<UserBase>& users, int* userCount, const char* delete
     for (int i = 0; i < *userCount; i++) {
         if (std::string(deleteUsername) == users[i].getUsername()) { // Kullanıcı adı karşılaştırması
             found = 1;
+            int isAdminUser = users[i].isAdminUser();
             for (int j = i; j < *userCount - 1; j++) {
                 // Kullanıcıları kaydır
                 users[j].setUsername(users[j + 1].getUsername());
@@ -352,6 +354,13 @@ void deleteuser(std::vector<UserBase>& users, int* userCount, const char* delete
                 users[j].setAdminUser(users[j + 1].isAdminUser());
             }
             (*userCount)--;
+
+              if (isAdminUser == 0) {
+                deletestandartuser(users, userCount, deleteUsername); // Standart kullanıcıyı sil
+            } else if (isAdminUser == 1) {
+                deleteadmin(admins, adminCount, deleteUsername); // Admin kullanıcısını sil  /// ana metoda parametre eklenecek.
+            }
+
 
             if (writeUsersToFile(users)) {
                 std::cout << "User '" << deleteUsername << "' has been successfully deleted." << std::endl;
@@ -532,6 +541,14 @@ void adduser(std::vector<UserBase>& users, int* userCount, const char* newUserna
 
     (*userCount)++;
 
+if (newUserIsAdmin == 0){
+   adduser(users, &userCount, newUsername, newPassword, newUserIsAdmin);
+} else {
+    
+     addadmin(admins, &adminCount, newUsername, newPassword, newUserIsAdmin); //ana metoda parametre eklenecek.
+}
+
+
     if (writeUsersToFile(users)) {
         std::cout << "User has been successfully added." << std::endl;
     } else {
@@ -684,7 +701,7 @@ void findUser(const std::vector<UserBase>& users, const std::string& username) {
             std::cout << "Username: " << user.getUsername() << std::endl;
             std::cout << "Password: " << user.getPassword() << std::endl;
             std::cout << "Is Admin: " << user.isAdminUser() << std::endl;
-            std::cout << "Admins are 0, Users are 1" << std::endl;
+            std::cout << "Admins are 1, Users are 0" << std::endl;
             std::cout << std::endl;
             found = 1;
         }
@@ -774,5 +791,228 @@ void readAdminFromTxtFile(admin& admin) {
         std::cout << "Admin information read from file: " << "admin.txt" << std::endl;
     } else {
         std::cerr << "Unable to open file: " << "admin.txt" << std::endl;
+    }
+}
+
+
+void addadmin (std::vector<admin>& admins, int* adminCount, const char* newUsername, const char* newPassword, int newUserIsAdmin) {
+    if (*adminCount >= 100) {
+        std::cout << "User limit exceeded. Cannot add more users." << std::endl;
+        return;
+    }
+
+    // Add the new user directly to the vector and set its properties individually
+    admins.emplace_back();
+    admins.back().setUsername(newUsername);
+    admins.back().setPassword(newPassword);
+   
+
+    (*adminCount)++;
+
+    if (WriteAdminToTxtFile(admins.back())) {
+        std::cout << "User has been successfully added." << std::endl;
+    } else {
+        std::cout << "User could not be added." << std::endl;
+    }
+}
+
+bool WriteAdminToTxtFile(const admin& admin) {
+    std::ofstream file("admin.txt");
+    if (file.is_open()) {
+        file << admin.getUsername() << std::endl;
+        file << admin.getPassword() << std::endl;
+        file.close();
+        std::cout << "Admin information written to file: " << "admin.txt" << std::endl;
+        return true;  // Başarılı oldu, true döndürüyoruz.
+    } else {
+        std::cerr << "Unable to open file: " << "admin.txt" << std::endl;
+        return false; // Başarısız oldu, false döndürüyoruz.
+    }
+}
+
+
+void deleteadmin(std::vector<admin>& admins, int* adminCount, const char* deleteadUsername) {
+    int found = 0;
+    for (int i = 0; i < *adminCount; i++) {
+        if (std::string(deleteadUsername) == admins[i].getUsername()) { // Kullanıcı adı karşılaştırması
+            found = 1;
+            for (int j = i; j < *adminCount - 1; j++) {
+                // Kullanıcıları kaydır
+                admins[j].setUsername(admins[j + 1].getUsername());
+                admins[j].setPassword(admins[j + 1].getPassword());
+                
+            }
+            (*adminCount)--;
+
+            if (WriteAdminToTxtFile(admins[i])) {
+                std::cout << "User '" << deleteadUsername << "' has been successfully deleted." << std::endl;
+            } else {
+                std::cout << "User '" << deleteadUsername << "' could not be deleted." << std::endl;
+            }
+            break;
+        }
+    }
+
+    if (!found) {
+        std::cout << "User '" << deleteadUsername << "' not found." << std::endl;
+    }
+}
+
+void updateAdmin(std::vector<admin>& admins, int adminCount, const char* usernameToUpdate, const char* newUsername, const char* newPassword, int newUserIsAdmin) {
+    for (int i = 0; i < adminCount; i++) {
+        if (std::string(usernameToUpdate) == admins[i].getUsername()) {
+            // Kullanıcı adı eşleşti, bu kullanıcıyı güncelleyebiliriz.
+            admins[i].setUsername(newUsername);
+            admins[i].setPassword(newPassword);
+           
+
+            if (WriteAdminToTxtFile(admins[i])) {
+                std::cout << "Admin '" << usernameToUpdate << "' has been successfully updated." << std::endl;
+            } else {
+                std::cout << "Admin '" << usernameToUpdate << "' could not be updated." << std::endl;
+            }
+            return; // Güncelleme işlemi tamamlandı, işlevi sonlandır
+        }
+    }
+
+    // Eğer buraya kadar geldiysek, kullanıcı adı bulunamadı.
+    std::cout << "Admin '" << usernameToUpdate << "' not found." << std::endl;
+}
+
+
+
+void addstandartuser(std::vector<User>& users, int* userCount, const char* newUsername, const char* newPassword, int newUserIsAdmin) {
+    if (*userCount >= 100) {
+        std::cout << "User limit exceeded. Cannot add more users." << std::endl;
+        return;
+    }
+
+    // Add the new user directly to the vector and set its properties individually
+    users.emplace_back();
+    users.back().setUsername(newUsername);
+    users.back().setPassword(newPassword);
+   
+
+    (*userCount)++;
+
+    if (WriteUserToTxtFile(users.back())) {
+        std::cout << "User has been successfully added." << std::endl;
+    } else {
+        std::cout << "User could not be added." << std::endl;
+    }
+}
+
+
+bool WriteUserToTxtFile(const User& user) {
+    std::ofstream file("user.txt");
+    if (file.is_open()) {
+        file << user.getUsername() << std::endl;
+        file << user.getPassword() << std::endl;
+        file.close();
+        std::cout << "User information written to file: " << "user.txt" << std::endl;
+        return true;  // Başarılı oldu, true döndürüyoruz.
+    } else {
+        std::cerr << "Unable to open file: " << "user.txt" << std::endl;
+        return false; // Başarısız oldu, false döndürüyoruz.
+    }
+}
+
+
+void deletestandartuser(std::vector<User>& users, int* userCount, const char* deleteUsername) {
+    int found = 0;
+    for (int i = 0; i < *userCount; i++) {
+        if (std::string(deleteUsername) == users[i].getUsername()) { // Kullanıcı adı karşılaştırması
+            found = 1;
+            for (int j = i; j < *userCount - 1; j++) {
+                // Kullanıcıları kaydır
+                users[j].setUsername(users[j + 1].getUsername());
+                users[j].setPassword(users[j + 1].getPassword());
+                
+            }
+            (*userCount)--;
+
+            if (WriteUserToTxtFile(users[i])) {
+                std::cout << "User '" << deleteUsername << "' has been successfully deleted." << std::endl;
+            } else {
+                std::cout << "User '" << deleteUsername << "' could not be deleted." << std::endl;
+            }
+            break;
+        }
+    }
+
+    if (!found) {
+        std::cout << "User '" << deleteUsername << "' not found." << std::endl;
+    }
+}
+
+
+
+void updatestandartuser(std::vector<User>& users, int userCount, const char* usernameToUpdate, const char* newUsername, const char* newPassword, int newUserIsAdmin) {
+    for (int i = 0; i < userCount; i++) {
+        if (std::string(usernameToUpdate) == users[i].getUsername()) {
+            // Kullanıcı adı eşleşti, bu kullanıcıyı güncelleyebiliriz.
+            users[i].setUsername(newUsername);
+            users[i].setPassword(newPassword);
+           
+
+            if (WriteUserToTxtFile(users[i])) {
+                std::cout << "User '" << usernameToUpdate << "' has been successfully updated." << std::endl;
+            } else {
+                std::cout << "User '" << usernameToUpdate << "' could not be updated." << std::endl;
+            }
+            return; // Güncelleme işlemi tamamlandı, işlevi sonlandır
+        }
+    }
+
+    // Eğer buraya kadar geldiysek, kullanıcı adı bulunamadı.
+    std::cout << "User '" << usernameToUpdate << "' not found." << std::endl;
+}
+
+
+
+void liststandartuser(const std::vector<User>& users) {
+    std::cout << "All users:" << std::endl;
+    for (const User& user : users) {
+        
+            std::cout << "Username: " << user.getUsername() << std::endl;
+            std::cout << "Password: " << user.getPassword() << std::endl;
+            std::cout << std::endl;
+        
+    }
+}
+
+void updateuser(std::vector<UserBase>& users, int userCount, const char* usernameToUpdate, const char* newUsername, const char* newPassword, int newUserIsAdmin) {
+    int found = 0;
+    int isAdminUser = -1; // -1: Bulunamadı, 0: Standart kullanıcı, 1: Admin kullanıcı
+
+    for (int i = 0; i < userCount; i++) {
+        if (std::string(usernameToUpdate) == users[i].getUsername()) { // Kullanıcı adı karşılaştırması
+            found = 1;
+            isAdminUser = users[i].isAdminUser(); // Kullanıcının admin durumunu al
+
+            // Kullanıcının bilgilerini güncelle
+            users[i].setUsername(newUsername);
+            users[i].setPassword(newPassword);
+            users[i].setAdminUser(newUserIsAdmin);
+
+            if (isAdminUser == 0) {
+                // Eğer kullanıcı bir standart kullanıcıysa, standart kullanıcı işlemini çağır
+                updatestandartuser(users, userCount, usernameToUpdate, newUsername, newPassword, newUserIsAdmin);
+            } else if (isAdminUser == 1) {
+                // Eğer kullanıcı bir admin kullanıcısıysa, admin işlemini çağır
+                updateAdmin(admins, adminCount, usernameToUpdate, newUsername, newPassword, newUserIsAdmin);
+            }
+
+            if (writeUsersToFile(users)) {
+                std::cout << "User '" << usernameToUpdate << "' has been successfully updated." << std::endl;
+            } else {
+                std::cout << "User '" << usernameToUpdate << "' could not be updated." << std::endl;
+            }
+            break;
+        }
+    }
+
+    if (!found) {
+        std::cout << "User '" << usernameToUpdate << "' not found." << std::endl;
     }
 }

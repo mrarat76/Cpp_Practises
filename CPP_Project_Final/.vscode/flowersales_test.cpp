@@ -13,6 +13,8 @@ int main() {
     std::vector<UserBase> users(100); // Maximum assumption of 100 users
     std::vector<Manager> managers = readManagersFromFile();
     int userCount = 0;
+    int adminCount=0;
+    int uscount=0;
 
     // Read users from a file
     if (!readUsersFromFile(users, userCount)) {
@@ -233,6 +235,7 @@ int main() {
                     std::cout << "9. List orders" << std::endl;
                     std::cout << "10. List all users" << std::endl;
                     std::cout << "11. Find user by Username" << std::endl;
+                    std::cout << "12. Update User" << std::endl;
                     std::cout << "Enter your choice: ";
                     std::cin >> choice;
 
@@ -392,6 +395,26 @@ int main() {
                             std::cout << "To find, enter the username: ";
                             std::cin >> userName;
                             findUser(users, userName.c_str());
+                            break;
+                        }
+                        case 12:{
+                            std::string userName;   
+                            std::cout << "To update, enter the username: ";
+                            std::cin >> userName;
+                            
+                            std::string newUsername;
+                            std::string newPassword;
+                            bool newUserIsAdmin;
+
+                            std::cout << "Enter the new username: ";
+                            std::cin >> newUsername;
+                            std::cout << "Enter the new password: ";
+                            std::cin >> newPassword;
+                            std::cout << "Specify if the user is an admin (1 for admin, 0 for regular user): ";
+                            std::cin >> newUserIsAdmin;
+
+                            updateuser(users, userCount, userName.c_str(), newUsername.c_str(), newPassword.c_str(), newUserIsAdmin);
+
                             break;
                         }
                         default:
