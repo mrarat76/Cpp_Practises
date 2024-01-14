@@ -1,6 +1,7 @@
 #include <string>
-#ifndef FLOWER_SALES_H
-#define FLOWER_SALES_H
+#ifndef FLOWER_SALES_HPP
+#define FLOWER_SALES_HPP
+
 #define MAX_FLOWERS 100
 
 // Define an enum
@@ -14,13 +15,10 @@ enum class FlowerType {
 
 class UserBase {
 public:
+ UserBase() : username(""), password(""), isAdmin(false) {}
     UserBase(const std::string& username, const std::string& password, bool isAdmin)
         : username(username), password(password), isAdmin(isAdmin) {}
 
-    std::string getUsername() const { return username; }
-    std::string getPassword() const { return password; }
-    bool isAdminUser() const { return isAdmin; }
-     // Getter metotları
     std::string getUsername() const { return username; }
     std::string getPassword() const { return password; }
     bool isAdminUser() const { return isAdmin; }
@@ -30,21 +28,23 @@ public:
     void setPassword(const std::string& newPassword) { password = newPassword; }
     void setAdminUser(bool newAdminStatus) { isAdmin = newAdminStatus; }
 
-
 private:
     std::string username;
     std::string password;
     bool isAdmin;
 };
 
+
 class User : public UserBase {
 public:
+     User() : UserBase() {}
     User(const std::string& username, const std::string& password, bool isAdmin)
         : UserBase(username, password, isAdmin) {}
 };
 
 class admin : public UserBase {
 public:
+        admin() : UserBase() {}
     admin(const std::string& username, const std::string& password, bool isAdmin)
         : UserBase(username, password, isAdmin) {}
 };
@@ -76,8 +76,4 @@ private:
     int stock;
 };
 
-Flower* flowerorderdb = nullptr;
-int flowerCount = 0;
-int flowercount = 0;
-
-#endif
+#endif // FLOWER_SALES_HPP

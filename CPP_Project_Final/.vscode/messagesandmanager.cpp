@@ -28,6 +28,8 @@ struct Manager {
     int messageCount;    // Number of messages
 
     Manager(const std::string& uname) : username(uname), messages(nullptr), messageCount(0) {}
+    Manager() : username(""), messages(nullptr), messageCount(0) {}
+
 
     // Method to write and store a message
     void writeMessage(const std::string& text) {
@@ -76,6 +78,7 @@ struct RegisterMessage : Message {
     std::string type;
 
     RegisterMessage(const std::string& t) : type(t) {}
+    RegisterMessage() : type("") {}
 
     std::string getType() const override {
         return "RegisterMessage (" + type + ")";
@@ -83,7 +86,7 @@ struct RegisterMessage : Message {
 };
 
 
-std::vector<Manager> readManagersFromFile(const std::string& filename = "managers.txt") {
+/*std::vector<Manager> readManagersFromFile(const std::string& filename = "managers.txt") {
     std::vector<Manager> managers; // Vector to store the managers read from the file
     #include <fstream> // Include the necessary header file for ifstream
 
@@ -104,25 +107,32 @@ std::vector<Manager> readManagersFromFile(const std::string& filename = "manager
     }
 
     return managers;
+}*/
+
+void readmanagersfromfile(std::vector<Manager>& managers, const std::string& filename ) {
+    std::ifstream file(filename);
+
+    if (file.is_open()) {
+        std::string line;
+
+        while (std::getline(file, line)) {
+            // Assuming each line in the file contains a username
+            Manager manager(line);
+            managers.push_back(manager);
+        }
+
+        file.close();
+    } else {
+        std::cerr << "Unable to open the file: " << filename << std::endl;
+    }
 }
 
 
-int main() {
-    Manager manager("JohnDoe");
 
-    manager.writeMessage("Hello, everyone!");
-    manager.writeMessage("I have an important announcement.");
-    manager.writeMessage("Have a great day!");
 
-    RegisterMessage registerMsg("New User Registration");
-    manager.writeMessage("Welcome to our platform!");
-    *(manager.messages[3]) = &registerMsg; // Add a custom message type using a double pointer
 
-    manager.listMessages();
 
-    return 0;
+void addToMessageArray(const std::string& messageType, std::vector<RegisterMessage>& messageArray) {
+    RegisterMessage newMessage(messageType);
+    messageArray.push_back(newMessage);
 }
-
-
-
-

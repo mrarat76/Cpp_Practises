@@ -12,14 +12,16 @@ int main() {
     loadFlowerDataFromFile();
     
     std::vector<UserBase> users(100); // Maximum assumption of 100 users
-    std::vector<Manager> managers = readManagersFromFile();
+    std::vector<Manager> managers(100); // Maximum assumption of 100 managers
+    readmanagersfromfile(managers, "managers.txt");
+   
     std::vector<User> userss (100);
     std::vector<admin> admins (100);
     std::vector<RegisterMessage> regs(100);
     
     int userCount = 0;
     int adminCount=0;
-    int uscount=0;
+    int uscount=0; 
 
     // Read users from a file
     if (!readUsersFromFile(users, userCount)) {
@@ -32,7 +34,7 @@ int main() {
         // If user data is empty, add a default admin user
         users[0].setUsername("admin") ;
         users[0].setPassword("admin123");
-        users[0].isAdminUser(); // Mark this user as admin
+        users[0].setAdminUser(true); // Mark this user as admin
         userCount = 1;
         if (writeUsersToFile(users)) {
             std::cout << "Default admin has been generated." << std::endl;
@@ -88,6 +90,7 @@ int main() {
                 std::cout << "=== MANAGER LOGIN / REGISTER ===" << std::endl;
                 std::cout << "1. Manager Login" << std::endl;
                 std::cout << "2. Register as User" << std::endl;
+                std::cout << "3. Exit" << std::endl;
                 std::cout << "Enter your choice: ";
                 std::cin >> managerChoice;
               
@@ -167,13 +170,16 @@ int main() {
                     std::cout << "===     REGISTER PAGE    ===" << std::endl;
                     std::cout << "Enter your message: ";
                     std::cin >> messageType;
-                    addToMessageArray( messageType.c_str(),regs);
+                    addToMessageArray(messageType.c_str(), regs);
                     // register array
                 }
                 case 3: {
-                std::cout << "Exiting..." << std::endl;
-                return 0; // Exit the program
+                   std::cout << "Exiting..." << std::endl;
+                            fflush(stdout); // Flush the buffer
+                            system("cls");  // Clear the console (for Windows)
+                            return main();
             }
+            
             default:
                 std::cout << "Invalid choice." << std::endl;
                 break;
@@ -340,8 +346,8 @@ int main() {
                                     flowerTypeEnum =static_cast<FlowerType>(4);
                                     break;
                                 default:
-                                    std::cout << "Invalid flower type." << std::endl;
-                                    return;
+                                  std::cout << "Invalid selection. Please choose a valid option." << std::endl;
+
                             }
 
                             addFlower(id, flowerName.c_str(), flowerPrice, flowerTypeEnum, flowerStock);
