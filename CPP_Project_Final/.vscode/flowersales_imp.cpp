@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include "flowessalse.hpp"
 #include <sstream> 
+ #include <algorithm> // Add the missing include directive
 
 
 
@@ -17,12 +18,16 @@
 Flower flowerDatabase[100];
 int flowerCount = 0;
 
-Flower* flowerorderdb = nullptr;
+Flower* flowerorderdb = new Flower[MAX_FLOWERS]; // Assuming MAX_FLOWERS is the maximum number of flowers you want to store
+
 int flowercount = 0;
 
 // Function implementations
 void initializeFlowerDatabase() {
     flowerCount = 0;
+}
+void initializeFlowerOrderDatabase() {
+    flowercount = 0;
 }
 std::ostream& operator<<(std::ostream& os, const FlowerType& flowerType) {
     switch (flowerType) {
@@ -57,7 +62,7 @@ void loadFlowerDataFromFile() {
 
     int flowerID;
     std::string name;
-    double price;
+    int price;
     int typeAsInt;
     int stock;
 
@@ -67,7 +72,49 @@ void loadFlowerDataFromFile() {
         flowerCount++;
     }
 
+     if (file.fail() && !file.eof()) {
+        std::cout << "Dosya okuma hatası." << std::endl;
+    }
+
     file.close();
+
+
+
+    
+
+    
+}
+
+
+void loadFlowerorderDataFromFile() {
+    std::ifstream file("flowerorder.txt");
+
+    if (!file.is_open()) {
+        std::cerr << "Dosya açma hatası" << std::endl;
+        return; // Exit the function without storing data if there's an error
+    }
+
+    int flowerID;
+    std::string name;
+    int price;
+    int typeAsInt;
+    int stock;
+
+    while (file >> flowerID >> name >> price >> typeAsInt >> stock) {
+        FlowerType type = static_cast<FlowerType>(typeAsInt);
+        Flower flower(flowerID, name, price, type, stock);
+        flowerorderdb[flowercount] = flower;
+        flowercount++;
+    }
+
+    if (file.fail() && !file.eof()) {
+        std::cerr << "Dosya okuma hatası." << std::endl;
+    }
+
+    file.close();
+
+
+    
 }
 
 
@@ -262,7 +309,7 @@ int writeFlowerOrdersToFile(Flower* orders, int count) {
     }
 
     for (int i = 0; i < count; i++) {
-        file << orders[i].getFlowerID() << " " << orders[i].getName() << " " << orders[i].getPrice() << " " << orders[i].getType() << " " << orders[i].getStock() << std::endl;
+        file << orders[i].getFlowerID() << " " << orders[i].getName() << " " << orders[i].getPrice() << " " <<static_cast<int> (orders[i].getType()) << " " << orders[i].getStock() << std::endl;
     }
 
     file.close();
@@ -276,10 +323,12 @@ int writeFlowerDataToFile() {
     if (!file.is_open()) {
         return 0;
     }
-
-    for (int i = 0; i < flowerCount; i++) {
-        file << flowerDatabase[i].getFlowerID() << " " << flowerDatabase[i].getName() << " " << flowerDatabase[i].getPrice() << " " << flowerDatabase[i].getType() << " " << flowerDatabase[i].getStock() << std::endl;
+     for (int i = 0; i < flowerCount; i++) {
+        file << flowerDatabase[i].getFlowerID() << " " << flowerDatabase[i].getName() << " " << flowerDatabase[i].getPrice() << " " << static_cast<int>(flowerDatabase[i].getType()) << " " << flowerDatabase[i].getStock() << std::endl;
     }
+    /*for (int i = 0; i < flowerCount; i++) {
+        file << flowerDatabase[i].getFlowerID() << " " << flowerDatabase[i].getName() << " " << flowerDatabase[i].getPrice() << " " << flowerDatabase[i].getType() << " " << flowerDatabase[i].getStock() << std::endl;
+    }*/
 
     file.close();
     std::cout << "Flower data has been written to the file." << std::endl; // Add the missing std::cout statement
@@ -454,7 +503,28 @@ bool readUsersFromFile(std::vector<UserBase>& users, int& userCount) {
     return true; // Data successfully read from the file
 }
 
+bool initializeUsers(std::vector<UserBase>& users) {
+    // Open the user file for reading
+    std::ifstream userFile("users.txt");
+    if (!userFile) {
+        return false; // Unable to open the file
+    }
 
+    // Read user data from the file and populate the users vector
+    std::string username;
+    std::string password;
+    bool isAdmin;
+    
+    while (userFile >> username >> password >> isAdmin) {
+        // Use the constructor to create a UserBase object and add it to the vector
+        users.emplace_back(username, password, isAdmin);
+    }
+
+    // Close the file
+    userFile.close();
+
+    return true; // Data successfully read from the file
+}
 
 
 
@@ -737,8 +807,8 @@ void readAdminFromTxtFile(admin& admin) {
 bool WriteAdminToTxtFile(const admin& adminc) {
     std::ofstream file("admin.txt");
     if (file.is_open()) {
-        file << adminc.getUsername() << std::endl;
-        file << adminc.getPassword() << std::endl;
+        file << adminc.getUsername() << adminc.getPassword()<< std::endl;
+        
         file.close();
         std::cout << "Admin information written to file: " << "admin.txt" << std::endl;
         return true;  // Başarılı oldu, true döndürüyoruz.
@@ -852,8 +922,8 @@ void addstandartuser(std::vector<User>& userse, int* userCount, const char* newU
 bool WriteUserToTxtFile(const User& user) {
     std::ofstream file("user.txt");
     if (file.is_open()) {
-        file << user.getUsername() << std::endl;
-        file << user.getPassword() << std::endl;
+        file << user.getUsername()  << std::endl;
+        file  << std::endl;
         file.close();
         std::cout << "User information written to file: " << "user.txt" << std::endl;
         return true;  // Başarılı oldu, true döndürüyoruz.
@@ -935,10 +1005,11 @@ void liststandartuser(const std::vector<User>& users) {
 
 void deleteuser(std::vector<UserBase>& users, int* userCount, const char* deleteUsername,std::vector<admin>& admins, int adminCount, std::vector<User>& userss, int usercount) {
     int found = 0;
+    int isAdminUser ;
     for (int i = 0; i < *userCount; i++) {
         if (std::string(deleteUsername) == users[i].getUsername()) { // Kullanıcı adı karşılaştırması
             found = 1;
-            int isAdminUser = users[i].isAdminUser();
+            isAdminUser = users[i].isAdminUser(); // Kullanıcının admin durumunu al
             for (int j = i; j < *userCount - 1; j++) {
                 // Kullanıcıları kaydır
                 users[j].setUsername(users[j + 1].getUsername());
@@ -952,7 +1023,7 @@ void deleteuser(std::vector<UserBase>& users, int* userCount, const char* delete
             } else if (isAdminUser == 1) {
                 deleteadmin(admins, &adminCount, deleteUsername); // Admin kullanıcısını sil  /// ana metoda parametre eklenecek.
             }
-
+           
 
             if (writeUsersToFile(users)) {
                 std::cout << "User '" << deleteUsername << "' has been successfully deleted." << std::endl;
@@ -969,6 +1040,82 @@ void deleteuser(std::vector<UserBase>& users, int* userCount, const char* delete
 }
 
 
+void deleteUser(std::vector<UserBase>& users, int* userCount, const char* deleteUsername,std::vector<admin>& admins, int adminCount, std::vector<User>& userss, int usercount){
+    int found = 0;
+    int isadminUser ;
+    
+    
+    for (auto it = users.begin(); it != users.end(); ++it) {
+        if (it->getUsername() == deleteUsername) {
+            found = 1;
+           isadminUser= it->isAdminUser();
+            users.erase(it);
+            break;
+            (*userCount)--;
+        }
+    }
+
+    
+              if (isadminUser == 0) {
+                deletestandartuser(userss, userCount, deleteUsername); // Standart kullanıcıyı sil
+            } else if (isadminUser == 1) {
+                deleteadmin(admins, &adminCount, deleteUsername); // Admin kullanıcısını sil  /// ana metoda parametre eklenecek.
+            }
+           
+             writeUsersToFile(users);
+           
+            if (writeUsersToFile(users)) {
+                std::cout << "User '" << deleteUsername << "' has been successfully deleted." << std::endl;
+            } else {
+                std::cout << "User '" << deleteUsername << "' could not be deleted." << std::endl;
+            }
+            
+    
+    if (found==0) {
+        std::cout << "User '" << deleteUsername << "' not found." << std::endl;
+    }
+    
+    
+    
+    
+    }
+
+
+/*
+void deleteuSer(std::vector<UserBase>& users, int* userCount, const char* deleteUsername, std::vector<admin>& admins, int adminCount, std::vector<User>& userss, int usercount) {
+    int found = 0;
+    int isAdminUser;
+
+    for (int i = 0; i < *userCount; i++) {
+        if (deleteUsername == users[i].getUsername()) { // Kullanıcı adı karşılaştırması
+            found = 1;
+            isAdminUser = users[i].isAdminUser(); // Kullanıcının admin durumunu al
+
+            users.erase(users.begin() + i); // Kullanıcıyı vektörden sil
+
+            (*userCount)--;
+
+            if (isAdminUser == 0) {
+                deletestandartuser(userss, userCount, deleteUsername); // Standart kullanıcıyı sil
+            } else if (isAdminUser == 1) {
+                deleteadmin(admins, &adminCount, deleteUsername); // Admin kullanıcısını sil
+            }
+            writeUsersToFile(users);
+            if (writeUsersToFile(users)) {
+                std::cout << "User '" << deleteUsername << "' has been successfully deleted." << std::endl;
+            } else {
+                std::cout << "User '" << deleteUsername << "' could not be deleted." << std::endl;
+            }
+            break;
+        }
+    }
+}*/ 
+
+
+
+
+
+
 void adduser(std::vector<UserBase>& users, int* userCount, const char* newUsername, const char* newPassword, int newUserIsAdmin,std::vector<admin>& admins, int adminCount, std::vector<User>& userss, int usercount ) {
     if (*userCount >= 100) {
         std::cout << "User limit exceeded. Cannot add more users." << std::endl;
@@ -981,7 +1128,7 @@ void adduser(std::vector<UserBase>& users, int* userCount, const char* newUserna
     users.back().setPassword(newPassword);
     users.back().setAdminUser(newUserIsAdmin);
 
-    (*userCount)++;
+    
 
 if (newUserIsAdmin == 0){
    addstandartuser(userss, &usercount, newUsername, newPassword, newUserIsAdmin);

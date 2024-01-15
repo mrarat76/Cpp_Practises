@@ -9,15 +9,30 @@
 int main() {
     // Initialize the flower database
     initializeFlowerDatabase();
+    initializeFlowerOrderDatabase();
     loadFlowerDataFromFile();
-    
-    std::vector<UserBase> users(100); // Maximum assumption of 100 users
-    std::vector<Manager> managers(100); // Maximum assumption of 100 managers
+    loadFlowerorderDataFromFile();
+    std::vector<UserBase> users; // Dinamik olarak büyüyebilir
+    std::vector<Manager> managers; // Dinamik olarak büyüyebilir
+    std::vector<User> userss; // Dinamik olarak büyüyebilir
+    std::vector<admin> admins; // Dinamik olarak büyüyebilir
+    std::vector<RegisterMessage> regs; // Dinamik olarak büyüyebilir
+
+    /*std::vector<UserBase> users(100); // Maximum assumption of 100 users
+    std::vector<Manager> managers(100); // Maximum assumption of 100 managers*/
     readmanagersfromfile(managers, "managers.txt");
-   
+   /*
     std::vector<User> userss (100);
     std::vector<admin> admins (100);
-    std::vector<RegisterMessage> regs(100);
+    std::vector<RegisterMessage> regs(100);*/
+
+
+    
+    if (initializeUsers(users)) {
+        std::cout << "Users initialized successfully." << std::endl;
+    } else {
+        std::cout << "Unable to initialize users from file." << std::endl;
+    }
     
     int userCount = 0;
     int adminCount=0;
@@ -32,6 +47,9 @@ int main() {
     // Default admin user check
     if (userCount == 0) {
         // If user data is empty, add a default admin user
+        if (users.empty()) {
+        users.emplace_back(); // Add a new User object to the vector
+    }
         users[0].setUsername("admin") ;
         users[0].setPassword("admin123");
         users[0].setAdminUser(true); // Mark this user as admin
@@ -111,57 +129,70 @@ int main() {
 
                     // Check username and password, allow them to log in
                     int userIndex = -1;
-                    for (int i = 0; i < userCount; i++) {
-                        if (managerusername == managers[i].username && managerpassword == managers[i].password) {
-                            
-                            std::cout << "Welcome " << managers[i].username << std::endl;
-                            std::cout << "1. Check Flower Sales" << std::endl;
-                            std::cout << "2. Check Flower Stock" << std::endl;
-                            std::cout << "3. List Users" << std::endl;
-                            std::cout << "4. Send Message to Admin" << std::endl;
-                            std::cout << "5. Exit" << std::endl;
-                            int swchoice;
-                            std::cin >> swchoice;
+bool exitMenu = false;
 
-                            switch (swchoice)
-                            {
-                            case 1:{
-                                 listOrders();}
-                            break;
-                               case 2:{
-                                 listFlowers(flowerDatabase, flowerCount);
-                            break;}
-                                 case 3:{
-                                    listUsers(users);
-                            break;}
-                            case 4:
-                            {
+while (!exitMenu) {
+    for (int i = 0; i < userCount; i++) {
+        if (managerusername == managers[i].username && managerpassword == managers[i].password) {
+            std::cout << "Welcome " << managers[i].username << std::endl;
+            std::cout << "1. Check Flower Sales" << std::endl;
+            std::cout << "2. Check Flower Stock" << std::endl;
+            std::cout << "3. List Users" << std::endl;
+            std::cout << "4. Send Message to Admin" << std::endl;
+            std::cout << "5. Exit" << std::endl;
+            std::cout << "6. List Messages" << std::endl;
 
-                            
-                                std::string message;
-                                std::cout << "Enter your message: ";
-                                std::cin >> message;
-                                managers[i].writeMessage(message);
-                            break;}
-                                    case 5:{
-                                        std::cout << "Exiting..." << std::endl;
-                                        fflush(stdout); // Flush the buffer
-                                        system("cls");  // Clear the console (for Windows)
-                                        return main();}
-                            
-                            default:
-                                std::cout << "Invalid choice." << std::endl;
-                                break;
-                            }
-                            break;
-                        }
-                    }
+            int swchoice;
+            std::cin >> swchoice;
 
-                    if (!isLoggedIn) {
-                        std::cout << "Invalid username or password." << std::endl;
-                        continue; // If user can't log in, return to the main menu
-                    }
+            switch (swchoice) {
+                case 1: {
+                    listOrders();
                     break;
+                }
+                case 2: {
+                    listFlowers(flowerDatabase, flowerCount);
+                    break;
+                }
+                case 3: {
+                    listUsers(users);
+                    break;
+                }
+                case 4: {
+                    std::string message;
+                    std::cout << "Enter your message: ";
+                    std::cin >> message;
+                    managers[i].writeMessage(message);
+                    break;
+                }
+                case 5: {
+                    std::cout << "Exiting..." << std::endl;
+                    exitMenu = true; // Set the flag to exit the loop
+                    break;
+                }
+                case 6: {
+                    managers[i].readmessages();
+                    break;
+                }
+                default: {
+                    std::cout << "Invalid choice." << std::endl;
+                    break;
+                }
+            }
+
+            if (exitMenu) {
+                  fflush(stdout); // Flush the buffer
+                system("cls");
+                return main();
+            }
+                break; // Exit the for loop
+               
+        }
+    }
+}
+
+                
+                
                 }
                 
 
@@ -169,8 +200,10 @@ int main() {
                     std::string messageType;
                     std::cout << "===     REGISTER PAGE    ===" << std::endl;
                     std::cout << "Enter your message: ";
+                    std::cout << "Enter your message as concatanated for insance: adduser,username,password,1 or 0 ";
                     std::cin >> messageType;
-                    addToMessageArray(messageType.c_str(), regs);
+                    addToMessageArray(messageType, regs);
+                    writemessagestotxt(regs);
                     // register array
                 }
                 case 3: {
@@ -254,6 +287,7 @@ int main() {
                     std::cout << "10. List all users" << std::endl;
                     std::cout << "11. Find user by Username" << std::endl;
                     std::cout << "12. Update User" << std::endl;
+                    std::cout<<"13. List Messages"<<std::endl;
                     std::cout << "Enter your choice: ";
                     std::cin >> choice;
 
@@ -275,10 +309,11 @@ int main() {
                             break;
                         }
                         case 2: {
-                            std::string deleteUser;
+                            std::string deleteUSer;
                             std::cout << "Enter the username to delete: ";
-                            std::cin >> deleteUser;
-                            deleteuser(users, &userCount, deleteUser.c_str(), admins, adminCount, userss, uscount);
+                            std::cin >> deleteUSer;
+                            deleteUser(users, &userCount, deleteUSer.c_str(), admins, adminCount, userss, userCount); // Pass deleteUser.c_str()
+
                             break;
                         }
                         case 3: {
@@ -387,11 +422,13 @@ int main() {
                             std::cout << "Enter the new flower price: ";
                             std::cin >> newFlowerPrice;
                             std::cout << "Specify the new flower type: ";
+                            std::cout << "Specify the flower type: {ROSE -> 0, TULIP->1, LILY->2, DAISY->3, SUNFLOWER->4} ";
                             std::cin >> newFlowerType;
                             std::cout << "Enter the new flower stock quantity: ";
                             std::cin >> newFlowerStock;
 
                             updateFlower(editFlowerID, newFlowerName.c_str(), newFlowerPrice, static_cast<FlowerType>(newFlowerType));
+                            writeFlowerDataToFile();
 
                             break;
                         }
@@ -435,6 +472,12 @@ int main() {
 
                             updateuser(users, userCount, userName.c_str(), newUsername.c_str(), newPassword.c_str(), newUserIsAdmin, admins, adminCount, userss, uscount);
 
+                            break;
+                        }
+                        case 13:{
+                            for (int i = 0; i < userCount; i++) {
+
+                            managers[i].readmessages();}
                             break;
                         }
                         default:

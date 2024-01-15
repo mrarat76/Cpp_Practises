@@ -62,6 +62,15 @@ struct Manager {
             std::cout << "Message " << i + 1 << ": " << (*(messages[i]))->getType() << ": " << (*(messages[i]))->messageText << std::endl;
         }
     }
+    void readmessages() {
+    for (int i = 0; i < messageCount; ++i) {
+        Message* message = *(messages[i]);
+        std::string messageText = message->messageText;
+        // Now, you can use 'messageText' to access the text of the message.
+        std::cout << "Message " << i + 1 << ": " << messageText << std::endl;
+    }
+}
+
 
     // Destructor to free memory
     ~Manager() {
@@ -108,7 +117,32 @@ struct RegisterMessage : Message {
 
     return managers;
 }*/
+void readmanagersfromfile(std::vector<Manager>& managers, const std::string& filename) {
+    std::ifstream file(filename);
 
+    if (file.is_open()) {
+        std::string line;
+
+        while (std::getline(file, line)) {
+            std::istringstream iss(line);
+            std::string username, password;
+
+            // Assuming each line contains a username and a password separated by a space
+            if (iss >> username >> password) {
+                Manager manager(username);
+                manager.password = password;
+                managers.push_back(manager);
+            } else {
+                std::cerr << "Invalid line format in file: " << filename << std::endl;
+            }
+        }
+
+        file.close();
+    } else {
+        std::cerr << "Unable to open the file: " << filename << std::endl;
+    }
+}
+/*
 void readmanagersfromfile(std::vector<Manager>& managers, const std::string& filename ) {
     std::ifstream file(filename);
 
@@ -125,7 +159,7 @@ void readmanagersfromfile(std::vector<Manager>& managers, const std::string& fil
     } else {
         std::cerr << "Unable to open the file: " << filename << std::endl;
     }
-}
+}*/
 
 
 
@@ -134,5 +168,21 @@ void readmanagersfromfile(std::vector<Manager>& managers, const std::string& fil
 
 void addToMessageArray(const std::string& messageType, std::vector<RegisterMessage>& messageArray) {
     RegisterMessage newMessage(messageType);
-    messageArray.push_back(newMessage);
+    messageArray.emplace_back(newMessage);
+    messageArray.back().messageText = "This is a message of type " + messageType;
+   
+}
+
+void writemessagestotxt(std::vector<RegisterMessage>& messahearray){
+    std::ofstream file("messages.txt");
+
+    if (file.is_open()) {
+        for (const RegisterMessage& message : messahearray) {
+            file << message.getType() << std::endl;
+        }
+
+        file.close();
+    } else {
+        std::cerr << "Unable to open the file: " << "messages.txt" << std::endl;
+    }
 }

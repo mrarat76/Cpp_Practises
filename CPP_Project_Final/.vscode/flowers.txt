@@ -1,0 +1,4 @@
+1 Rose 10 1 50
+2 Tulip 5 2 100
+3 Sunflower 8 3 75
+4 tulip 2 2 20
