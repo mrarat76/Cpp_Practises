@@ -53,6 +53,7 @@ struct Manager {
         messages[messageCount] = ALLOC(Message*, 1);
         *(messages[messageCount]) = newMessage;
         ++messageCount;
+        
     }
 
     // Method to list all messages
@@ -166,12 +167,18 @@ void readmanagersfromfile(std::vector<Manager>& managers, const std::string& fil
 
 
 
-void addToMessageArray(const std::string& messageType, std::vector<RegisterMessage>& messageArray) {
-    RegisterMessage newMessage(messageType);
+/*void addToMessageArray(const std::string& messageType, std::vector<RegisterMessage>& messageArray) {
+   RegisterMessage newMessage(messageType);
     messageArray.emplace_back(newMessage);
     messageArray.back().messageText = "This is a message of type " + messageType;
    
+}*/
+void addToMessageArray(const std::string& messageType, std::vector<RegisterMessage>& messageArray) {
+    RegisterMessage newMessage(messageType);
+    newMessage.messageText = "This is a message of type " + messageType;
+    messageArray.push_back(newMessage);
 }
+
 
 void writemessagestotxt(std::vector<RegisterMessage>& messahearray){
     std::ofstream file("messages.txt");
@@ -186,3 +193,92 @@ void writemessagestotxt(std::vector<RegisterMessage>& messahearray){
         std::cerr << "Unable to open the file: " << "messages.txt" << std::endl;
     }
 }
+void readmessagesfromtxt(std::vector<RegisterMessage>& messahearray){
+    std::ifstream file("messages.txt");
+
+    if (file.is_open()) {
+        std::string line;
+
+        while (std::getline(file, line)) {
+            // Assuming each line in the file contains a username
+            RegisterMessage message(line);
+            messahearray.push_back(message);
+        }
+
+        file.close();
+    } else {
+        std::cerr << "Unable to open the file: " << "messages.txt" << std::endl;
+    }
+}
+void readregistermessages(std::vector<RegisterMessage>& messageArray) {
+    for(const RegisterMessage& message : messageArray) {
+        std::cout << message.getType() << std::endl;
+    }
+
+}
+void initializeregistremessagesfromtxt (std::vector<RegisterMessage>& messageArray){
+    readmessagesfromtxt(messageArray);
+}
+
+
+void writemanagerstofile(const std::vector<Manager>& managers, const std::string& filename) {
+    std::ofstream file(filename);
+
+    if (file.is_open()) {
+        for (const Manager& manager : managers) {
+            file << manager.username << " " << manager.password << std::endl;
+        }
+
+        file.close();
+    } else {
+        std::cerr << "Unable to open the file: " << filename << std::endl;
+    }
+}
+
+void addmanager(std::vector<Manager>& managers, const std::string& username, const std::string& password) {
+    Manager manager(username);
+    manager.password = password;
+    managers.push_back(manager);
+    writemanagerstofile(managers, "managers.txt");
+}
+
+void deletemanager(std::vector<Manager>& managers, const std::string& username) {
+    for (int i = 0; i < managers.size(); ++i) {
+        if (managers[i].username == username) {
+            managers.erase(managers.begin() + i);
+            break;
+        }
+    }
+    writemanagerstofile(managers, "managers.txt");
+}
+
+void listmanagers(const std::vector<Manager>& managers) {
+    std::cout << "Managers:" << std::endl;
+    for (const Manager& manager : managers) {
+        std::cout << manager.username << std::endl;
+    }
+}
+
+void updatemanager(std::vector<Manager>& managers, const std::string& username, const std::string& password) {
+    for (Manager& manager : managers) {
+        if (manager.username == username) {
+            manager.password = password;
+            break;
+        }
+    }
+    writemanagerstofile(managers, "managers.txt");
+}
+
+
+
+void findmanager(const std::vector<Manager>& managers, const std::string& username) {
+    for (const Manager& manager : managers) {
+        if (manager.username == username) {
+            std::cout << "Manager found: " << manager.username << " " << manager.password << std::endl;
+            return;
+        }
+    }
+
+    std::cout << "Manager not found." << std::endl;
+}
+

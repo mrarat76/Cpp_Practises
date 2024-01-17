@@ -1181,3 +1181,4 @@ void updateuser(std::vector<UserBase>& users, int userCount, const char* usernam
         std::cout << "User '" << usernameToUpdate << "' not found." << std::endl;
     }
 }
+

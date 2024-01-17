@@ -12,12 +12,13 @@ int main() {
     initializeFlowerOrderDatabase();
     loadFlowerDataFromFile();
     loadFlowerorderDataFromFile();
+    
     std::vector<UserBase> users; // Dinamik olarak büyüyebilir
     std::vector<Manager> managers; // Dinamik olarak büyüyebilir
     std::vector<User> userss; // Dinamik olarak büyüyebilir
     std::vector<admin> admins; // Dinamik olarak büyüyebilir
     std::vector<RegisterMessage> regs; // Dinamik olarak büyüyebilir
-
+    initializeregistremessagesfromtxt(regs);
     /*std::vector<UserBase> users(100); // Maximum assumption of 100 users
     std::vector<Manager> managers(100); // Maximum assumption of 100 managers*/
     readmanagersfromfile(managers, "managers.txt");
@@ -141,6 +142,15 @@ while (!exitMenu) {
             std::cout << "4. Send Message to Admin" << std::endl;
             std::cout << "5. Exit" << std::endl;
             std::cout << "6. List Messages" << std::endl;
+            std::cout << "7. Add Manager" << std::endl;
+            std::cout << "8. Delete Manager" << std::endl;
+            std::cout << "9. Update Manager" << std::endl;
+            std::cout << "10. Find Manager" << std::endl;
+            std::cout << "11. List Managers" << std::endl;
+            std::cout << "12. Update User" << std::endl;
+            std::cout << "13. Find User" << std::endl;
+            std::cout << "14.Read register messages" << std::endl;
+            std::cout << "Enter your choice:";
 
             int swchoice;
             std::cin >> swchoice;
@@ -174,6 +184,87 @@ while (!exitMenu) {
                     managers[i].readmessages();
                     break;
                 }
+                case 7: {
+                    std::string newUsername;
+                    std::string newPassword;
+
+                    std::cout << "Enter new username: ";
+                    std::cin >> newUsername;
+                    std::cout << "Enter new password: ";
+                    std::cin >> newPassword;
+
+                    addmanager(managers, newUsername.c_str(), newPassword.c_str());
+
+                    break;
+                }
+                case 8: {
+                    std::string deleteManager;
+                    std::cout << "Enter the username to delete: ";
+                    std::cin >> deleteManager;
+                    deletemanager(managers, deleteManager.c_str());
+
+                    break;
+                }
+                case 9: {
+                    std::string userName;
+                    std::cout << "To update, enter the username: ";
+                    std::cin >> userName;
+
+                    std::string newUsername;
+                    std::string newPassword;
+
+                    std::cout << "Enter the new password: ";
+                    std::cin >> newPassword;
+
+                    updatemanager(managers, userName.c_str(),  newPassword.c_str());
+
+                    break;
+                }
+                case 10: {
+                    std::string userName;
+                    std::cout << "To find, enter the username: ";
+                    std::cin >> userName;
+                    findmanager(managers, userName.c_str());
+                    break;
+                }
+                case 11: {
+                    listmanagers(managers);
+                    break;
+                }
+                case 12: {
+                    
+                    std::string userName;
+                    std::cout << "To update, enter the username: ";
+                    std::cin >> userName;
+       
+                    std::string newUsername;
+                    std::string newPassword;
+                    int newUserIsAdmin;
+
+                    std::cout << "Enter the new username: ";
+                    std::cin >> newUsername;
+                    std::cout << "Enter the new password: ";
+                    std::cin >> newPassword;
+                    std::cout << "Specify if the user is an admin (1 for admin, 0 for regular user): ";
+                    std::cin >> newUserIsAdmin;
+
+                    updateuser(users, userCount, userName.c_str(), newUsername.c_str(), newPassword.c_str(), newUserIsAdmin, admins, adminCount, userss, uscount);
+
+                    break;
+                }
+                case 13: {
+                    std::string userName;
+                    std::cout << "To find, enter the username: ";
+                    std::cin >> userName;
+                    findUser(users, userName.c_str());
+                    break;
+                }
+
+                case 14: {
+                    readregistermessages(regs);
+                    break;
+                }
+                
                 default: {
                     std::cout << "Invalid choice." << std::endl;
                     break;
@@ -288,6 +379,7 @@ while (!exitMenu) {
                     std::cout << "11. Find user by Username" << std::endl;
                     std::cout << "12. Update User" << std::endl;
                     std::cout<<"13. List Messages"<<std::endl;
+                    std::cout << "14.See massages from managers." << std::endl; 
                     std::cout << "Enter your choice: ";
                     std::cin >> choice;
 
@@ -475,11 +567,15 @@ while (!exitMenu) {
                             break;
                         }
                         case 13:{
-                            for (int i = 0; i < userCount; i++) {
-
-                            managers[i].readmessages();}
+                            readregistermessages(regs);
                             break;
                         }
+                        case 14:{
+                             Manager manager;
+
+                            manager.readmessages();}
+                            break;
+                        
                         default:
                             std::cout << "Invalid selection. Please choose a valid option." << std::endl;
                     }

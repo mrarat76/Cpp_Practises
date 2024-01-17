@@ -1,3 +1,4 @@
 admin1 admin2 0
 arat2 arat2 0
 admin admin4 1
+aral oz 1
