@@ -1,0 +1,3 @@
+RegisterMessage (RegisterMessage (RegisterMessage (add)))
+RegisterMessage (RegisterMessage (addme))
+RegisterMessage (a)
